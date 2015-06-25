@@ -1,0 +1,1 @@
+The com-and-go package makes it easier to interface with Windows COM components. The current version is in the v2 directory; the old version is left in the root directory for compatibility.
