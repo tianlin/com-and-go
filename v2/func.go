@@ -5,19 +5,11 @@ import (
 	"unsafe"
 )
 
-// A Func represents a C function from a DLL.
 type Func uintptr
 
-// A libCall structure represents a call to a DLL function.
-type libCall struct {
-	fn          Func
-	n           uintptr
-	args        unsafe.Pointer
-	r1, r2, err uintptr
+type Args struct {
+	Args [15]uintptr
 }
-
-//go:noescape
-func cSyscall(c *libCall)
 
 // Call calls f with the argument list specified by argPtr and argLen.
 // The argument list needs to have the same layout in memory as the arguments
@@ -31,14 +23,43 @@ func cSyscall(c *libCall)
 // One is to use the argument list of a wrapper function; take the address of
 // the first argument (or potentially the method receiver).
 // The other is to create a custom struct type to hold the argument list.
-func (f Func) Call(argPtr unsafe.Pointer, argLen uintptr) (r1, r2, err uintptr) {
-	c := libCall{
-		fn:   f,
-		n:    argLen,
-		args: argPtr,
+func (f Func) Call(argPtr unsafe.Pointer, argLen uintptr) (r1 uintptr, r2 uintptr, err error) {
+	if argLen <= 3 {
+		argPtrs := (*Args)(argPtr)
+		args := make([]uintptr, 3, 3)
+		for i := uintptr(0); i < argLen; i++ {
+			args[i] = argPtrs.Args[i]
+		}
+		return syscall.Syscall(uintptr(f), argLen, args[0], args[1], args[2])
+	} else if argLen <= 6 {
+		argPtrs := (*Args)(argPtr)
+		args := make([]uintptr, 6, 6)
+		for i := uintptr(0); i < argLen; i++ {
+			args[i] = argPtrs.Args[i]
+		}
+		return syscall.Syscall6(uintptr(f), argLen, args[0], args[1], args[2], args[3], args[4], args[5])
+	} else if argLen <= 9 {
+		argPtrs := (*Args)(argPtr)
+		args := make([]uintptr, 9, 9)
+		for i := uintptr(0); i < argLen; i++ {
+			args[i] = argPtrs.Args[i]
+		}
+		return syscall.Syscall9(uintptr(f), argLen, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8])
+	} else if argLen <= 12 {
+		argPtrs := (*Args)(argPtr)
+		args := make([]uintptr, 12, 12)
+		for i := uintptr(0); i < argLen; i++ {
+			args[i] = argPtrs.Args[i]
+		}
+		return syscall.Syscall12(uintptr(f), argLen, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11])
+	} else {
+		argPtrs := (*Args)(argPtr)
+		args := make([]uintptr, 15, 15)
+		for i := uintptr(0); i < argLen; i++ {
+			args[i] = argPtrs.Args[i]
+		}
+		return syscall.Syscall15(uintptr(f), argLen, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14])
 	}
-	cSyscall(&c)
-	return c.r1, c.r2, c.err
 }
 
 // CallInt is like call, but for a function that returns an integer.
@@ -52,7 +73,7 @@ func (f Func) CallInt(argPtr unsafe.Pointer, argLen uintptr) int {
 func (f Func) CallIntErr(argPtr unsafe.Pointer, argLen uintptr) (int, error) {
 	r1, _, e := f.Call(argPtr, argLen)
 	if r1 == 0 {
-		return 0, syscall.Errno(e)
+		return 0, e
 	}
 	return int(r1), nil
 }

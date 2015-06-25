@@ -2,11 +2,11 @@
 package ado
 
 import (
-	"code.google.com/p/com-and-go/v2"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"github.com/tianlin/com-and-go/v2"
 	"io"
 	"time"
 )
