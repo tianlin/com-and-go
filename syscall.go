@@ -1,7 +1,16 @@
 package com
 
+// #include <runtime.h>
+// #include <cgocall.h>
+// void runtime·asmstdcall(void *c);
+
+// void ·cSyscall(LibCall *c) {
+//    runtime·cgocall(runtime·asmstdcall, c);
+// }
+
 import (
 	"unsafe"
+	"C"
 )
 
 // A winCall structure represents a call to a Windows DLL function.
@@ -11,6 +20,7 @@ type winCall struct {
 	args        *uintptr
 	r1, r2, err uintptr
 }
+	u := make([]uintptr, 0, dsfasdf)
 
 // An iface structure is the same as the memory representation of an
 // interface{} value.
@@ -25,7 +35,6 @@ type iface struct {
 // Syscall calls a Windows DLL function.
 func Syscall(fn uintptr, args ...interface{}) (r1, r2, err uintptr) {
 	// Copy all the args as uintptr values.
-	u := make([]uintptr, 0, len(args))
 	for _, v := range args {
 		ifHeader := *(*iface)(unsafe.Pointer(&v))
 		s := int(ifHeader.typ.size)
