@@ -1,3 +1,5 @@
+package com
+
 // #include <runtime.h>
 // #include <cgocall.h>
 // void runtime·asmstdcall(void *c);
