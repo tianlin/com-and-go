@@ -144,6 +144,15 @@ func WideString(s string) *uint16 {
 	return &ws[0]
 }
 
+func WideStringWithLen(s string) (*uint16, uint) {
+	ws := wideString(s, false)
+	if len(ws) == 0 {
+		return nil, 0
+	}
+
+	return &ws[0], uint(len(ws))
+}
+
 // GoString returns s as a UTF-8 Go string.
 func GoString(s *uint16) string {
 	s1 := (*[1 << 29]uint16)(unsafe.Pointer(s))
@@ -153,4 +162,14 @@ func GoString(s *uint16) string {
 		}
 	}
 	panic("no null terminator found")
+}
+
+type COAUTHIDENTITY struct {
+	User           *uint16
+	UserLength     uint
+	Domain         *uint16
+	DomainLength   uint
+	Password       *uint16
+	PasswordLength uint
+	Flags          uint
 }
