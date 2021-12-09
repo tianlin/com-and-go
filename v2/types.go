@@ -80,7 +80,10 @@ type BStr struct {
 }
 
 func SysAllocStringLen(strIn *uint16, ui int) BStr {
-	r, _, _ := sysAllocStringLen.Call(unsafe.Pointer(&strIn), 2)
+	args := Args{
+		Args: [15]uintptr{uintptr(unsafe.Pointer(strIn)), uintptr(ui)},
+	}
+	r, _, _ := sysAllocStringLen.Call(unsafe.Pointer(&args), 2)
 	return BStr{(*uint16)(unsafe.Pointer(r))}
 }
 
